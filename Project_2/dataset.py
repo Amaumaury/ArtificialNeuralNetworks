@@ -3,7 +3,7 @@ import numpy as np
 import music21
 from tqdm import tqdm_notebook
 
-from typing import List, Dict, Callable, Set, Tuple
+from typing import List, Dict, Callable, Set, Tuple, Iterator
 
 datapath = "chorpus/"
 
@@ -11,8 +11,8 @@ class Dataset:
 
     def __init__(self, data: Dict[str, Dict[str, List[int]]], build_matrix_representation=False) -> 'Dataset':
         self.melodies = [Melody(melody_name, representation) for melody_name, representation in list(data.items())]
-        self.id_to_pitches, pitches_to_id = self.__build_mappings(self.extract_pitches())
-        self.id_to_durations, durations_to_id = self.__build_mappings(self.extract_durations())
+        self.id_to_pitches, pitches_to_id = Dataset.build_mappings(self.extract_pitches())
+        self.id_to_durations, durations_to_id = Dataset.build_mappings(self.extract_durations())
 
         for melody in self.melodies:
             melody.build_integer_representation(self.id_to_pitches, pitches_to_id, self.id_to_durations, durations_to_id)
@@ -46,6 +46,9 @@ class Dataset:
     def __len__(self) -> int:
         return len(self.melodies)
 
+    def __iter__(self) -> Iterator[Melody]:
+        return iter(self.melodies)
+
     def get_n_random_melodies(self, n: int, seed=0) -> List[Melody]:
         np.random.seed(seed)
         return [melody for melody in np.random.choice(self.melodies, n)]
@@ -69,12 +72,6 @@ class Dataset:
     def extract_durations(self) -> Set[int]:
         return set().union(*[melody.extract_durations() for melody in self.melodies])
 
-    def __build_mappings(self, possible_values: Set[int]) -> Tuple[Dict[int, int], Dict[int, int]]:
-        inv_map = lambda dict_: {v: k for k, v in dict_.items()}
-        ids = range(len(possible_values))
-        id_to_value = dict(zip(ids, sorted(possible_values)))
-        return id_to_value, inv_map(id_to_value)
-
     def transposeDataset(self) -> 'Dataset':
         transposed_dataset = {}
         dataset = self.get_midi_representation()
@@ -94,3 +91,10 @@ class Dataset:
                 transposed_dataset[label]['T'] = dataset[label]['T']
 
         return Dataset(transposed_dataset)
+
+    @staticmethod
+    def build_mappings(possible_values: Set[int]) -> Tuple[Dict[int, int], Dict[int, int]]:
+        inv_map = lambda dict_: {v: k for k, v in dict_.items()}
+        ids = range(len(possible_values))
+        id_to_value = dict(zip(ids, sorted(possible_values)))
+        return id_to_value, inv_map(id_to_value)
