@@ -12,10 +12,12 @@ class Dataset:
         self.id_to_pitches, pitches_to_id = self.__build_mappings(self.extract_piches())
         self.id_to_durations, durations_to_id = self.__build_mappings(self.extract_durations())
 
+        for melody in self.melodies:
+            melody.build_integer_representation(self.id_to_pitches, pitches_to_id, self.id_to_durations, durations_to_id)
+
         if build_matrix_representation:
             max_length = 0
             for melody in self.melodies:
-                melody.build_integer_representation(self.id_to_pitches, pitches_to_id, self.id_to_durations, durations_to_id)
                 melody.build_matrix_representation(len(self.id_to_pitches), len(self.id_to_durations))
                 max_length = max(max_length, melody.get_length())
 
