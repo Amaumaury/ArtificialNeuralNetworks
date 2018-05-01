@@ -58,10 +58,9 @@ class Dataset:
         return {name: representation for name, representation in melodies}
 
     def get_integer_representation(self):
-        # TODO: Fix
         melodies = [melody.get_integer_representation() for melody in self.melodies]
         return {name: representation for name, representation in melodies}
-    
+
     def extract_pitches(self) -> Set[int]:
         return set().union(*[melody.extract_pitches() for melody in self.melodies])
 
