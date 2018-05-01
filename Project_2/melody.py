@@ -3,6 +3,7 @@ import keras.utils
 
 from typing import List, Dict, Set, Tuple, Iterable
 class Melody:
+
     def __init__(self, name: str, representation: Dict['str', List[int]]) -> 'Melody':
         self.name = name
         self.midi_pitches = representation['P']
@@ -11,9 +12,14 @@ class Melody:
         self.integer_durations = None
         self.matrix_pitches = None
         self.matrix_durations = None
+        self.std_matrix_pitches = None
+        self.std_matrix_durations = None
 
     def __len__(self) -> int:
         return len(self.midi_pitches)
+
+    def get_feeding_representation(self):
+        return (self.std_matrix_pitches, self.std_matrix_durations)
 
     def get_name(self) -> str:
         return self.name
@@ -26,7 +32,7 @@ class Melody:
 
     def get_matrix_representation(self):
         if self.matrix_pitches is None or self.matrix_durations is None:
-            self.build_matrix_representation()
+            raise ValueError('Matrix representation was not build')
         # TODO: Add type
         return (self.name, {'P': self.matrix_pitches, 'T': self.matrix_durations})
 
@@ -57,4 +63,3 @@ class Melody:
     def build_standardized_matrix_representation(self, max_length: int):
         self.std_matrix_pitches = pad_sequences(self.matrix_pitches.T, maxlen=max_length).T
         self.std_matrix_durations = pad_sequences(self.matrix_durations.T, maxlen=max_length).T
-
