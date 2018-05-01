@@ -2,6 +2,7 @@ from melody import Melody
 import numpy as np
 import music21
 from tqdm import tqdm_notebook
+import json
 
 from typing import List, Dict, Callable, Set, Tuple, Iterator
 
@@ -26,11 +27,21 @@ class Dataset:
             for melody in self.melodies:
                 melody.build_standardized_matrix_representation(max_length)
 
+    def get_training_arrays(self):
+        pitches_training_array, durations_training_array = zip(*[melody.get_feeding_representation() for melody in self.melodies])
+        return np.array(pitches_training_array), np.array(durations_training_array)
+
+    def get_melodies_length(self):
+        return {melody.get_name(): len(melody) for melody in self.melodies}
+
+    def get_max_melody_len(self):
+        return max([len(melody) for melody in self.melodies])
+
     def get_mappings(self) -> Dict[str, Dict[int, int]]:
         return {'P': self.id_to_pitches, 'T': self.id_to_durations}
 
     def with_matrix_representation(self):
-        return Dataset(self.get_midi_representation(), True)
+        return Dataset(self.get_midi_representation(), build_matrix_representation=True)
 
     def filter(self, condition: Callable[[Melody], bool]) -> 'Dataset':
         melodies = map(lambda melody: melody.get_midi_representation(), filter(condition, self.melodies))
@@ -90,6 +101,23 @@ class Dataset:
                 transposed_dataset[label]['T'] = dataset[label]['T']
 
         return Dataset(transposed_dataset)
+
+    def write_to_file(self, file_name):
+        melodies = [melody.get_integer_representation() for melody in self.melodies]
+        melodies = {name: representation for name, representation in melodies}
+
+        with open(file_name, 'w') as file:
+            file.write(json.dumps(melodies))
+            file.close()
+
+    @staticmethod
+    def load_from_file(file_name):
+        tmp_dataset = None
+
+        with open(file_name, 'r') as file:
+            tmp_dataset = Dataset(json.load(file), build_matrix_representation=True)
+
+        return tmp_dataset
 
     @staticmethod
     def build_mappings(possible_values: Set[int]) -> Tuple[Dict[int, int], Dict[int, int]]:
