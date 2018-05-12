@@ -41,13 +41,11 @@ def buildModel(dictionaries, batch_length, dropout=0.2, activation='GRU', Hsize=
     H['1'] = Concatenate(name="MergeX")([M['T'], M['P']])
     
     if activation == 'GRU':
-        ...
-        #Your hidden layer(s) architecture with GRU
+        rnn_layer = GRU(Hsize, dropout=dropout, return_sequences=True)(H['1'])
     elif activation == 'LSTM':
         ...
         #Your hidden layer(s) architecture with LSTM (For your own curiosity, not required for the project)
     elif activation == 'RNN':
-        #Your hidden layer(s) architecture with SimpleRNN
         rnn_layer = SimpleRNN(Hsize, dropout=dropout, return_sequences=True)(H['1'])
         
     print(rnn_layer)
@@ -68,7 +66,7 @@ def buildModel(dictionaries, batch_length, dropout=0.2, activation='GRU', Hsize=
 # Create model
 RNNmodel = buildModel(hack_dict, 
                       batch_length=max_melody_length-1,#Put here the number of notes (timesteps) you have in your Zero-padded matrices
-                      activation='RNN')
+                      activation='GRU')
 
 print(RNNmodel.summary())
 
@@ -81,4 +79,4 @@ history = RNNmodel.fit(
 )
 
 # Save
-RNNmodel.save('simpleRNN.hdf5')
+RNNmodel.save('gru.hdf5')
