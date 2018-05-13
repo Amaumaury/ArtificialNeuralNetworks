@@ -1,6 +1,7 @@
 from dataset import Dataset
 
 import keras
+import json
 from keras.models import Model, load_model
 from keras.layers import Input, Masking, TimeDistributed, Dense, Concatenate, Dropout, LSTM, GRU, SimpleRNN, Lambda
 from keras.optimizers import Adam
@@ -101,3 +102,6 @@ history = RNNmodel.fit(
 
 # Save
 RNNmodel.save('gru.hdf5')
+
+with open("gru_history.json", "w") as f:
+    json.dump(history.history, f)
