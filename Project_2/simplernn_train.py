@@ -100,7 +100,7 @@ print(RNNmodel.summary())
 history = RNNmodel.fit(
     x=[x_durations_training_array, x_pitches_training_array],
     y=[y_durations_training_array, y_pitches_training_array],
-    epochs=1,
+    epochs=250,
     validation_split=0.2,
     callbacks=[RealEarlyStopper()]
 )

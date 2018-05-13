@@ -27,6 +27,15 @@ class Dataset:
             for melody in self.melodies:
                 melody.build_standardized_matrix_representation(max_length)
 
+    def matrix_to_integer_representation(self, melody):
+        pitches = melody['P']
+        durations = melody['T']
+
+        pitches = [np.argwhere(vec_pitch == 1)[0][0] for vec_pitch in pitches if 1 in vec_pitch]
+        durations = [np.argwhere(vec_duration == 1)[0][0] for vec_duration in durations if 1 in vec_duration]
+
+        return pitches, durations
+
     def get_training_arrays(self):
         pitches_training_array, durations_training_array = zip(*[melody.get_feeding_representation() for melody in self.melodies])
         return np.array(pitches_training_array), np.array(durations_training_array)
@@ -59,6 +68,9 @@ class Dataset:
 
     def __iter__(self) -> Iterator[Melody]:
         return iter(self.melodies)
+
+    def contains(self, melody_name):
+        return sum([melody.get_name() == melody_name for melody in self.melodies]) > 0
 
     def get_n_random_melodies(self, n: int, seed=0) -> List[Melody]:
         np.random.seed(seed)
@@ -103,7 +115,7 @@ class Dataset:
         return Dataset(transposed_dataset)
 
     def write_to_file(self, file_name):
-        melodies = [melody.get_integer_representation() for melody in self.melodies]
+        melodies = [melody.get_midi_representation() for melody in self.melodies]
         melodies = {name: representation for name, representation in melodies}
 
         with open(file_name, 'w') as file:
