@@ -2,6 +2,7 @@ from dataset import Dataset
 
 import keras
 import json
+import numpy as np
 from keras.models import Model, load_model
 from keras.layers import Input, Masking, TimeDistributed, Dense, Concatenate, Dropout, LSTM, GRU, SimpleRNN, Lambda
 from keras.optimizers import Adam
@@ -12,20 +13,24 @@ from keras.callbacks import ModelCheckpoint
 
 class RealEarlyStopper(keras.callbacks.Callback):
     def __init__(self, set_best_at_end=True):
+        self._best_YT_acc = -1
+        self._best_YP_acc = -1
         self._best_score = -1
         self._best_weights = None
         self._set_best_at_end = set_best_at_end
 
     def on_epoch_end(self, epoch=None, logs={}):
-        valacc = logs['val_acc']
-        if valacc > self._best_score:
-            self._best_score = valacc
+        val_YT_acc = logs['val_YT_acc']
+        val_YP_acc = logs['val_YP_acc']
+        if val_YT_acc >= self._best_YT_acc and val_YP_acc >= self._best_YP_acc:
+            self._best_YT_acc = val_YT_acc
+            self._best_YP_acc = val_YP_acc
             self._best_weights = [np.copy(layer.get_weights()) for layer in self.model.layers]
 
     def on_train_end(self, logs={}):
         if not self._set_best_at_end:
             return
-        print('Restoring the model parameters giving best validation accuracy: {}'.format(self._best_score))
+        print('Restoring the model parameters giving best duration validation accuracy: {}, best pitch validation accuracy: {}'.format(self._best_YT_acc, self._best_YP_acc))
         for layer, best_weights in zip(self.model.layers, self._best_weights):
             layer.set_weights(best_weights)
 
@@ -95,7 +100,7 @@ print(RNNmodel.summary())
 history = RNNmodel.fit(
     x=[x_durations_training_array, x_pitches_training_array],
     y=[y_durations_training_array, y_pitches_training_array],
-    epochs=250,
+    epochs=1,
     validation_split=0.2,
     callbacks=[RealEarlyStopper()]
 )
