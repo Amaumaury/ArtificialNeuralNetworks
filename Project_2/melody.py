@@ -33,7 +33,6 @@ class Melody:
     def get_matrix_representation(self):
         if self.matrix_pitches is None or self.matrix_durations is None:
             raise ValueError('Matrix representation was not build')
-        # TODO: Add type
         return (self.name, {'P': self.matrix_pitches, 'T': self.matrix_durations})
 
     def get_std_matrix_representation(self):
