@@ -91,6 +91,10 @@ class Dataset:
         flatten = lambda l: [item for sublist in l for item in sublist]
         return flatten([melody.get_midi_durations() for melody in self.melodies])
 
+    def get_all_midi_pitches(self) -> List[int]:
+        flatten = lambda l: [item for sublist in l for item in sublist]
+        return flatten([melody.get_midi_pitches() for melody in self.melodies])
+
     def extract_durations(self) -> Set[int]:
         return set().union(*[melody.extract_durations() for melody in self.melodies])
 

@@ -38,6 +38,9 @@ class Melody:
     def get_std_matrix_representation(self):
         return (self.name, {'P': self.std_matrix_pitches, 'T': self.std_matrix_durations})
 
+    def get_midi_pitches(self) -> List[int]:
+        return self.midi_pitches
+
     def get_midi_durations(self) -> List[int]:
         return self.midi_durations
 
